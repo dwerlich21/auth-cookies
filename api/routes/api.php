@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
     Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/recover-password', [LoginController::class, 'recoverPassword']);
+    Route::post('/forgot-password', [LoginController::class, 'forgotPassword']);
 
     Route::group([
         'middleware' => [

@@ -1,122 +1,125 @@
-<script>
+<script setup>
+import {ref, onMounted} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
 import {notifyError, notifySuccess} from "@/composables/messages";
 import http from "@/http";
 
-export default {
-    data() {
-        return {
-            load: false
-        }
-    },
-    mounted() {
-        document.querySelectorAll("form .auth-pass-inputgroup")
-            .forEach(function (item) {
-                item.querySelectorAll(".password-addon").forEach(function (subitem) {
-                    subitem.addEventListener("click", function () {
-                        var passwordInput = item.querySelector(".password-input");
-                        if (passwordInput.type === "password") {
-                            passwordInput.type = "text";
-                        } else {
-                            passwordInput.type = "password";
-                        }
-                    });
+// Router
+const route = useRoute();
+const router = useRouter();
+
+// Data
+const load = ref(false);
+
+// Methods
+const validatePassword = async () => {
+    load.value = true;
+    const passwordContainer = document.getElementById("password-contain");
+    const invalidElement = passwordContainer.querySelector(".invalid");
+    if (invalidElement) {
+        notifyError('Preencha todos os requisitos');
+        setTimeout(() => {
+            load.value = false;
+        }, 200);
+        return;
+    }
+
+    const password = document.getElementById("password-input");
+    const password2 = document.getElementById("confirm-password-input");
+    if (password.value !== password2.value) {
+        notifyError('As senhas não são iguais!');
+        setTimeout(() => {
+            load.value = false;
+        }, 200);
+        return;
+    }
+
+    const data = {
+        password: password.value,
+        password2: password2.value,
+        token: route.query.token,
+        email: route.query.email,
+    }
+
+    try {
+        const response = await http.post('recover-password', data);
+        notifySuccess(response.data.message);
+        setTimeout(() => {
+            router.push('/login');
+        }, 300);
+    } catch (error) {
+        notifyError(error.response?.data || 'Erro ao resetar senha');
+    } finally {
+        setTimeout(() => {
+            load.value = false;
+        }, 200);
+    }
+};
+
+// Lifecycle
+onMounted(() => {
+    document.querySelectorAll("form .auth-pass-inputgroup")
+        .forEach(function (item) {
+            item.querySelectorAll(".password-addon").forEach(function (subitem) {
+                subitem.addEventListener("click", function () {
+                    const passwordInput = item.querySelector(".password-input");
+                    if (passwordInput.type === "password") {
+                        passwordInput.type = "text";
+                    } else {
+                        passwordInput.type = "password";
+                    }
                 });
             });
+        });
 
+    const myInput = document.getElementById("password-input");
+    const letter = document.getElementById("pass-lower");
+    const capital = document.getElementById("pass-upper");
+    const number = document.getElementById("pass-number");
+    const length = document.getElementById("pass-length");
 
-        var myInput = document.getElementById("password-input");
-        var letter = document.getElementById("pass-lower");
-        var capital = document.getElementById("pass-upper");
-        var number = document.getElementById("pass-number");
-        var length = document.getElementById("pass-length");
-
-        // When the user starts to type something inside the password field
-        myInput.onkeyup = function () {
-            // Validate lowercase letters
-            var lowerCaseLetters = /[a-z]/g;
-            if (myInput.value.match(lowerCaseLetters)) {
-                letter.classList.remove("invalid");
-                letter.classList.add("valid");
-            } else {
-                letter.classList.remove("valid");
-                letter.classList.add("invalid");
-            }
-
-            // Validate capital letters
-            var upperCaseLetters = /[A-Z]/g;
-            if (myInput.value.match(upperCaseLetters)) {
-                capital.classList.remove("invalid");
-                capital.classList.add("valid");
-            } else {
-                capital.classList.remove("valid");
-                capital.classList.add("invalid");
-            }
-
-            // Validate numbers
-            var numbers = /[0-9]/g;
-            if (myInput.value.match(numbers)) {
-                number.classList.remove("invalid");
-                number.classList.add("valid");
-            } else {
-                number.classList.remove("valid");
-                number.classList.add("invalid");
-            }
-
-            // Validate length
-            if (myInput.value.length >= 8) {
-                length.classList.remove("invalid");
-                length.classList.add("valid");
-            } else {
-                length.classList.remove("valid");
-                length.classList.add("invalid");
-            }
-        };
-    },
-    methods: {
-        validatePassword() {
-            this.load = true;
-            var passwordContainer = document.getElementById("password-contain");
-            var invalidElement = passwordContainer.querySelector(".invalid");
-            if (invalidElement) {
-                notifyError('Preencha todos os requisitos');
-                setTimeout(() => {
-                    this.load = false;
-                }, 200)
-                return;
-            }
-
-            var password = document.getElementById("password-input"),
-                password2 = document.getElementById("confirm-password-input");
-            if (password.value !== password2.value) {
-                notifyError('As senhas não são iguais!');
-                setTimeout(() => {
-                    this.load = false;
-                }, 200)
-                return;
-            }
-            http.put('recuperar', {
-                password: password.value,
-                password2: password2.value,
-                'token': this.$route.params.token
-            })
-                .then((response) => {
-                    notifySuccess(response.data.message);
-                    setTimeout(() => {
-                        this.$router.push('/login')
-                    }, 300)
-                })
-                .catch((response) => {
-                    notifyError(response.response.data)
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        this.load = false;
-                    }, 200)
-                })
+    // When the user starts to type something inside the password field
+    myInput.onkeyup = function () {
+        // Validate lowercase letters
+        const lowerCaseLetters = /[a-z]/g;
+        if (myInput.value.match(lowerCaseLetters)) {
+            letter.classList.remove("invalid");
+            letter.classList.add("valid");
+        } else {
+            letter.classList.remove("valid");
+            letter.classList.add("invalid");
         }
-    },
 
-};
+        // Validate capital letters
+        const upperCaseLetters = /[A-Z]/g;
+        if (myInput.value.match(upperCaseLetters)) {
+            capital.classList.remove("invalid");
+            capital.classList.add("valid");
+        } else {
+            capital.classList.remove("valid");
+            capital.classList.add("invalid");
+        }
+
+        // Validate numbers
+        const numbers = /[0-9]/g;
+        if (myInput.value.match(numbers)) {
+            number.classList.remove("invalid");
+            number.classList.add("valid");
+        } else {
+            number.classList.remove("valid");
+            number.classList.add("invalid");
+        }
+
+        // Validate length
+        if (myInput.value.length >= 8) {
+            length.classList.remove("invalid");
+            length.classList.add("valid");
+        } else {
+            length.classList.remove("valid");
+            length.classList.add("invalid");
+        }
+    };
+});
 </script>
 
 <template>
@@ -140,17 +143,17 @@ export default {
                             <b-card-body class="p-4">
                                 <div class="mt-2">
                                     <div class="text-center">
-                                    <img
-                                        src="@/assets/logos/logo-grande.png"
-                                        alt="logo_bauminas"
-                                        height="80"
-                                    >
-                                    <h5 class="text-primary mt-3">
-                                        Esqueceu a Senha?
-                                    </h5>
-                                    <p class="text-muted">
-                                        Redefinir senha
-                                    </p>
+                                        <img
+                                            src="@/assets/logos/logo-grande.png"
+                                            alt="logo_bauminas"
+                                            height="80"
+                                        >
+                                        <h5 class="text-primary mt-3">
+                                            Esqueceu a Senha?
+                                        </h5>
+                                        <p class="text-muted">
+                                            Redefinir senha
+                                        </p>
                                     </div>
 
                                     <div class="p-2">

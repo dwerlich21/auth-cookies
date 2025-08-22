@@ -3,10 +3,18 @@
 namespace App\Services;
 
 use App\Exceptions\NotFoundException;
+use App\Exceptions\ValidationException;
+use App\Jobs\RecoverPasswordEmail;
+use App\Jobs\SendWelcomeEmail;
+use App\Models\User;
 use App\Repositories\UserRepository;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class UserService extends BaseService
 {
@@ -79,14 +87,14 @@ class UserService extends BaseService
         if ($addressData && $this->hasNonEmptyValues($addressData)) {
             // Converter keys do formato camelCase para snake_case se necessário
             $addressFormatted = [
-                'zip_code' => $addressData['zipCode'] ?? $addressData['zip_code'] ?? null,
-                'uf' => $addressData['uf'] ?? null,
-                'city' => $addressData['city'] ?? null,
+                'zip_code'     => $addressData['zipCode'] ?? $addressData['zip_code'] ?? null,
+                'uf'           => $addressData['uf'] ?? null,
+                'city'         => $addressData['city'] ?? null,
                 'neighborhood' => $addressData['neighborhood'] ?? null,
-                'address' => $addressData['address'] ?? null,
-                'number' => $addressData['number'] ?? null,
-                'complement' => $addressData['complement'] ?? null,
-                'tenant_id' => auth()->user()->tenant_id ?? null,
+                'address'      => $addressData['address'] ?? null,
+                'number'       => $addressData['number'] ?? null,
+                'complement'   => $addressData['complement'] ?? null,
+                'tenant_id'    => auth()->user()->tenant_id ?? null,
             ];
 
             // Usar updateOrCreate para evitar duplicatas
@@ -110,7 +118,7 @@ class UserService extends BaseService
 
         $user = $this->repository->find($id);
 
-        if (! $user) {
+        if (!$user) {
             throw new \App\Exceptions\NotFoundException('Usuário não encontrado');
         }
 
@@ -137,13 +145,13 @@ class UserService extends BaseService
         if (isset($data['basicInfo'])) {
             $basicInfo = $data['basicInfo'];
             $userData = [
-                'name' => $basicInfo['name'] ?? null,
-                'email' => $basicInfo['email'] ?? null,
-                'cpf' => $basicInfo['cpf'] ?? null,
-                'type' => $basicInfo['type'] ?? null,
+                'name'     => $basicInfo['name'] ?? null,
+                'email'    => $basicInfo['email'] ?? null,
+                'cpf'      => $basicInfo['cpf'] ?? null,
+                'type'     => $basicInfo['type'] ?? null,
                 'position' => $basicInfo['position'] ?? null,
-                'phone' => $basicInfo['phone'] ?? null,
-                'active' => $basicInfo['active'] ?? $data['active'] ?? true,
+                'phone'    => $basicInfo['phone'] ?? null,
+                'active'   => $basicInfo['active'] ?? $data['active'] ?? true,
             ];
 
             // Password pode estar em basicInfo ou na raiz
@@ -151,28 +159,28 @@ class UserService extends BaseService
         } else {
             // Dados flat (sem basicInfo)
             $userData = [
-                'name' => $data['name'] ?? null,
-                'email' => $data['email'] ?? null,
-                'cpf' => $data['cpf'] ?? null,
-                'type' => $data['type'] ?? null,
+                'name'     => $data['name'] ?? null,
+                'email'    => $data['email'] ?? null,
+                'cpf'      => $data['cpf'] ?? null,
+                'type'     => $data['type'] ?? null,
                 'position' => $data['position'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'active' => $data['active'] ?? true,
+                'phone'    => $data['phone'] ?? null,
+                'active'   => $data['active'] ?? true,
             ];
 
             $password = $data['password'] ?? null;
         }
 
         // Hash da senha se fornecida
-        if (! empty($password)) {
+        if (!empty($password)) {
             $userData['password'] = Hash::make($password);
-        } elseif (! $isUpdate) {
+        } elseif (!$isUpdate) {
             // Senha padrão para novos usuários se não fornecida
             $userData['password'] = Hash::make('123456');
         }
 
         // Adicionar tenant_id do usuário autenticado
-        if (! $isUpdate && auth()->user()) {
+        if (!$isUpdate && auth()->user()) {
             $userData['tenant_id'] = auth()->user()->tenant_id;
         }
 
@@ -195,5 +203,56 @@ class UserService extends BaseService
         $filename = 'perfil.png';
 
         return $file->storeAs($path, $filename, 'local');
+    }
+
+    /**
+     * @throws NotFoundException
+     * @throws ValidationException
+     */
+    public function recoverPassword($data): void
+    {
+        $errors = [];
+        if (empty($data['email'])) {
+            $errors['email'] = ['E-mail é obrigatório para recuperação de senha'];
+        }
+
+        if (empty($data['token'])) {
+            $errors['token'] = ['Token é obrigatório para recuperação de senha'];
+        }
+
+        if(!empty($errors)) {
+            throw new ValidationException($errors);
+        }
+
+        $user = User::where('email', $data['email'])->first();
+
+        if(!$user) {
+            throw new NotFoundException('Usuário não encontrado com o e-mail fornecido');
+        }
+
+        if (!Password::broker()->tokenExists($user, $data['token'])) {
+            throw new NotFoundException('Token de recuperação de senha inválido ou expirado');
+        }
+
+        $user->password = Hash::make($data['password']);
+        $user->save();
+
+        DB::table('password_reset_tokens')
+            ->where('email', $data['email'])
+            ->delete();
+    }
+
+    /**
+     * @throws NotFoundException
+     */
+    public function forgotPassword($data)
+    {
+        $user = User::where('email', $data['email'])->first();
+
+        if(!$user) {
+            throw new NotFoundException('Usuário não encontrado com o e-mail fornecido');
+        }
+
+        RecoverPasswordEmail::dispatch($user);
     }
 }

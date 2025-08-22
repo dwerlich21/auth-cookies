@@ -1,55 +1,41 @@
-<script>
+<script setup>
+import { ref } from 'vue';
 import Lottie from "@/components/widgets/lottie.vue";
 import animationData from "@/components/widgets/rhvddzym.json";
 import http from "@/http";
-import {notifyError, notifySuccess} from "@/composables/messages";
+import { notifyError, notifySuccess } from "@/composables/messages";
 
-export default {
-    components: {lottie: Lottie},
-    page: {
-        title: "Recuperar Senha",
-        meta: [
-            {
-                name: "description",
-            },
-        ],
-    },
-    data() {
-        return {
-            email: "",
-            submitted: false,
-            error: null,
-            tryingToReset: false,
-            defaultOptions: {animationData: animationData},
-            load: false
-        };
-    },
-    methods: {
-        signinapi() {
-            this.load = true;
-            if (this.email === '') {
-                notifyError('Informe um e-mail!');
-                setTimeout(() => {
-                    this.load = false;
-                }, 200)
-                return;
-            }
-            http.post('recuperar', {
-                email: this.email,
-            })
-                .then((response) => {
-                    notifySuccess(response.data.message)
-                })
-                .catch((response) => {
-                    notifyError(response.response.data)
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        this.load = false;
-                    }, 200)
-                })
-        }
-    },
+// Data
+const email = ref("");
+const submitted = ref(false);
+const error = ref(null);
+const tryingToReset = ref(false);
+const defaultOptions = { animationData: animationData };
+const load = ref(false);
+
+// Methods
+const signinapi = async () => {
+    load.value = true;
+    if (email.value === '') {
+        notifyError('Informe um e-mail!');
+        setTimeout(() => {
+            load.value = false;
+        }, 200);
+        return;
+    }
+    
+    try {
+        const response = await http.post('forgot-password', {
+            email: email.value,
+        });
+        notifySuccess(response.data.message || 'Email de recuperação enviado com sucesso');
+    } catch (error) {
+        notifyError(error.response?.data?.message || 'Erro ao enviar email de recuperação');
+    } finally {
+        setTimeout(() => {
+            load.value = false;
+        }, 200);
+    }
 };
 </script>
 

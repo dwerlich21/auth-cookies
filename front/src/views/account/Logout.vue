@@ -1,32 +1,24 @@
-<script>
+<script setup>
+import { onMounted } from 'vue';
 import animationData from "@/components/widgets/hzomhqxz.json";
 import Lottie from "@/components/widgets/lottie.vue";
 import { useAuthStore } from "@/stores/auth.js";
 
-export default {
-    components: {
-        lottie: Lottie
-    },
-    data() {
-        return {
-            defaultOptions: {
-                animationData: animationData
-            },
-            authStore: null,
-        };
-    },
-    created() {
-        this.authStore = useAuthStore();
-    },
-    mounted() {
-        this.logout();
-    },
-    methods: {
-        logout() {
-            this.authStore.logout();
-        }
-    }
+// Data
+const defaultOptions = {
+    animationData: animationData
 };
+const authStore = useAuthStore();
+
+// Methods
+const logout = () => {
+    authStore.logout();
+};
+
+// Lifecycle
+onMounted(() => {
+    logout();
+});
 </script>
 
 <!--eslint-disable no-mixed-spaces-and-tabs-->

@@ -1,78 +1,59 @@
-<script>
+<script setup>
+import {ref, onMounted} from 'vue';
 import {notifyError} from "@/composables/messages";
 import http from "@/http";
 import env from "@/env";
 import {useAuthStore} from "@/stores/auth.js";
 import {endLoading} from "@/composables/spinners";
 
+// Data
+const email = ref('');
+const password = ref('');
+const forgot_password = ref(false);
+const load = ref(false);
+const authStore = useAuthStore();
 
-export default {
-    page: {
-        title: "Login",
-        meta: [{
-            name: "description",
-        }],
-    },
-    data() {
-        return {
-            email: '',
-            password: "",
-            forgot_password: false,
-            load: false,
-            env,
-            authStore: null,
-        };
-    },
-    created() {
-        this.authStore = useAuthStore();
-    },
-    methods: {
-        login() {
-            this.load = true;
-            const self = this;
-            const api = env.api + "login";
+// Methods
+const login = async () => {
+    load.value = true;
+    const api = env.api + "login";
 
-            http
-                .post(api, {
-                    email: self.email,
-                    password: self.password,
-                })
-                .then((response) => {
-                    // Cookies are set automatically by the backend
-                    // No need to save token in localStorage
-                    this.authStore.initialize();
-                })
-                .catch((error) => {
-                    notifyError("Credenciais Inválidas");
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        this.load = false;
-                    }, 300)
-                })
-        },
-        showPass() {
-            const type = document.getElementById('password-input').type;
-
-            if (type === 'password') {
-                document.getElementById('password-input').type = 'text';
-            } else {
-                document.getElementById('password-input').type = 'password';
-            }
-
-        }
-    },
-
-    mounted() {
-        endLoading();
-        if (window.location.href.indexOf('sistema.simplificagabinete') > -1) {
-            this.email = '';
-            this.password = '';
-        } else if (window.location.href.indexOf('citygov') > -1) {
-            this.email = 'contato@citygov.com.br';
-        }
+    try {
+        const response = await http.post(api, {
+            email: email.value,
+            password: password.value,
+        });
+        // Cookies are set automatically by the backend
+        // No need to save token in localStorage
+        authStore.initialize();
+    } catch (error) {
+        notifyError("Credenciais Inválidas");
+    } finally {
+        setTimeout(() => {
+            load.value = false;
+        }, 300);
     }
 };
+
+const showPass = () => {
+    const passwordInput = document.getElementById('password-input');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+    } else {
+        passwordInput.type = 'password';
+    }
+};
+
+// Lifecycle
+onMounted(() => {
+    endLoading();
+    if (window.location.href.indexOf('sistema.simplificagabinete') > -1) {
+        email.value = '';
+        password.value = '';
+    } else if (window.location.href.indexOf('citygov') > -1) {
+        email.value = 'contato@citygov.com.br';
+    }
+});
 </script>
 
 <template>
@@ -152,6 +133,12 @@ export default {
                                                     ></i>
                                                 </b-button>
                                             </div>
+                                        </div>
+
+                                        <div class="mb-3 text-end">
+                                            <router-link to="/esqueceu-senha">
+                                                Esqueceu a senha?
+                                            </router-link>
                                         </div>
 
                                         <div class="mt-4">

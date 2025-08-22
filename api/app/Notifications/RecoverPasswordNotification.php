@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Password;
 
-class WelcomeNotification extends Notification implements ShouldQueue
+class RecoverPasswordNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -39,13 +39,12 @@ class WelcomeNotification extends Notification implements ShouldQueue
         $resetUrl = env('PORTAL_URL', 'http://localhost:8080') . '/recuperar-senha?token=' . $token . '&email=' . urlencode($notifiable->email);
 
         return (new MailMessage)
-            ->subject('Bem-vindo ao Sistema - Defina sua senha')
+            ->subject('Recuperação de Senha - ' . config('app.name'))
             ->greeting('Olá, ' . $notifiable->name . '!')
-            ->line('Seja bem-vindo(a) ao sistema de ' . config('app.name') . '.')
-            ->line('Sua conta foi criada com sucesso. Para acessar o sistema, você precisa definir uma senha.')
-            ->action('Definir Senha', $resetUrl)
+            ->line('Você está recebendo este e-mail porque recebemos uma solicitação de redefinição de senha para sua conta.')
+            ->action('Redefinir Senha', $resetUrl)
             ->line('Este link de redefinição de senha expirará em 60 minutos.')
-            ->line('Se você não solicitou a criação desta conta, nenhuma ação adicional é necessária.')
+            ->line('Se você não solicitou uma redefinição de senha, nenhuma ação adicional é necessária.')
             ->salutation('Atenciosamente, ' . config('app.name'));
     }
 
@@ -57,7 +56,7 @@ class WelcomeNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Bem-vindo ao sistema',
+            'message' => 'Solicitação de recuperação de senha enviada',
         ];
     }
 }

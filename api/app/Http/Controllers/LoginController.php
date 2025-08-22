@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ForgotPasswordRequest;
+use App\Http\Requests\RecoverPasswordRequest;
 use App\Services\CookieManager;
+use App\Services\UserService;
+use App\Traits\ExceptionHandlerTrait;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,14 +14,18 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController
 {
+    use ExceptionHandlerTrait;
+
     private const ACCESS_TOKEN_NAME = 'access-token';
     private const REFRESH_TOKEN_NAME = 'refresh-token';
-    
+
     protected CookieManager $cookieManager;
-    
-    public function __construct(CookieManager $cookieManager)
+    protected UserService $userService;
+
+    public function __construct(CookieManager $cookieManager, UserService $userService)
     {
         $this->cookieManager = $cookieManager;
+        $this->userService = $userService;
     }
 
     private function generateTokens($user): array
@@ -39,7 +47,7 @@ class LoginController
         );
 
         return [
-            'access' => $accessToken->plainTextToken,
+            'access'  => $accessToken->plainTextToken,
             'refresh' => $refreshToken->plainTextToken,
         ];
     }
@@ -48,11 +56,11 @@ class LoginController
     {
         try {
             $credentials = $request->validate([
-                'email' => ['required', 'email'],
+                'email'    => ['required', 'email'],
                 'password' => ['required'],
             ]);
 
-            if (! Auth::attempt($credentials)) {
+            if (!Auth::attempt($credentials)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Credenciais inválidas',
@@ -63,7 +71,7 @@ class LoginController
             $tokens = $this->generateTokens($user);
 
             return response()->json([
-                'user' => $user,
+                'user'    => $user,
                 'success' => true,
                 'message' => 'Login realizado com sucesso',
             ])
@@ -73,7 +81,7 @@ class LoginController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao realizar login: '.$e->getMessage(),
+                'message' => 'Erro ao realizar login: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -92,5 +100,31 @@ class LoginController
         ])
             ->withCookie($this->cookieManager->forgetAccessTokenCookie())
             ->withCookie($this->cookieManager->forgetRefreshTokenCookie());
+    }
+
+    public function recoverPassword(RecoverPasswordRequest $request): JsonResponse
+    {
+        return $this->handleWithoutTransaction(function () use ($request) {
+
+            $data = $request->all();
+            $this->userService->recoverPassword($data);
+
+            return $this->successResponse(null, 'Senha alterada com sucesso');
+
+        }, 'Erro ao buscar registros');
+
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        return $this->handleWithoutTransaction(function () use ($request) {
+
+            $data = $request->all();
+            $this->userService->forgotPassword($data);
+
+            return $this->successResponse(null, 'Foi enviado um link para redefinição de senha para o e-mail informado');
+
+        }, 'Erro ao buscar registros');
+
     }
 }

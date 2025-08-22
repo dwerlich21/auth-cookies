@@ -3,16 +3,15 @@
 namespace App\Jobs;
 
 use App\Models\User;
-use App\Notifications\WelcomeNotification;
-use Illuminate\Bus\Queueable;
+use App\Notifications\RecoverPasswordNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SendWelcomeEmail implements ShouldQueue
+class RecoverPasswordEmail implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, \Illuminate\Bus\Queueable, SerializesModels;
 
     protected $user;
 
@@ -29,6 +28,6 @@ class SendWelcomeEmail implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->user->notify(new WelcomeNotification());
+        $this->user->notify(new RecoverPasswordNotification());
     }
 }
