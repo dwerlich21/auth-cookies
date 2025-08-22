@@ -4,7 +4,7 @@ export default [
     {
         path: "/login",
         name: "login",
-        component: () => import("@/views/account/login"),
+        component: () => import("@/views/account/Login.vue"),
         meta: {
             title: "Login",
             // beforeResolve(routeTo, routeFrom, next) {
@@ -14,14 +14,6 @@ export default [
             //         next();
             //     }
             // },
-        },
-    },
-    {
-        path: "/registrar",
-        name: "register",
-        component: () => import("@/views/account/register.vue"),
-        meta: {
-            title: "Cadastrar",
         },
     },
 
@@ -37,15 +29,15 @@ export default [
     {
         path: "/esqueceu-senha",
         name: "forgot-password",
-        component: () => import("@/views/account/forgot-password.vue"),
+        component: () => import("@/views/account/ForgotPassword.vue"),
         meta: {
             title: "Recuperar Senha",
         },
     },
     {
-        path: "/recuperar-senha/:token",
+        path: "/recuperar-senha",
         name: "change-password",
-        component: () => import("@/views/account/change-password.vue"),
+        component: () => import("@/views/account/ChangePassword.vue"),
         meta: {
             title: "Resetar Senha",
         },
@@ -53,7 +45,7 @@ export default [
     {
         path: "/logout",
         name: "logout",
-        component: () => import("@/views/account/logout"),
+        component: () => import("@/views/account/Logout.vue"),
         meta: {
             title: "Logout",
         },

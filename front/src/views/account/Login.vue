@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable */
 import {notifyError} from "@/composables/messages";
 import http from "@/http";
 import env from "@/env";
@@ -76,8 +75,6 @@ export default {
 };
 </script>
 
-
-<!--eslint-disable no-mixed-spaces-and-tabs-->
 <template>
     <div class="auth-page-wrapper pt-5">
         <div
@@ -157,15 +154,6 @@ export default {
                                             </div>
                                         </div>
 
-                                        <div class="mb-3 d-flex justify-content-between">
-                                            <router-link to="/esqueceu-senha">
-                                                Esqueceu a senha?
-                                            </router-link>
-                                            <router-link to="/registrar">
-                                                Realizar Cadastro
-                                            </router-link>
-                                        </div>
-
                                         <div class="mt-4">
                                             <b-button
                                                 variant="soft-primary"
@@ -187,20 +175,6 @@ export default {
                                             </b-button>
                                         </div>
                                     </form>
-                                </div>
-
-                                <div class="mt-4 text-center">
-                                    <div class="signin-other-title">
-                                        <h5 class="fs-13 mb-2 title">Entrar com</h5>
-                                    </div>
-                                    <div>
-                                        <a
-                                            :href="`${env.url}login/google`"
-                                            class="btn btn-danger btn-icon ms-1"
-                                        >
-                                            <i class="ri-google-fill fs-16"></i>
-                                        </a>
-                                    </div>
                                 </div>
 
                             </b-card-body>

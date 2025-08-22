@@ -38,10 +38,10 @@ class WelcomeNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $token = Password::createToken($notifiable);
-        $resetUrl = env('PORTAL_URL', 'http://localhost:3000') . '/reset-password?token=' . $token . '&email=' . urlencode($notifiable->email);
-        
+        $resetUrl = env('PORTAL_URL', 'http://localhost:3000') . '/recuperar-senha?token=' . $token . '&email=' . urlencode($notifiable->email);
+
         $tenantName = $this->tenantName ?: 'nossa plataforma';
-        
+
         return (new MailMessage)
             ->subject('Bem-vindo ao Sistema - Defina sua senha')
             ->greeting('Olá, ' . $notifiable->name . '!')
