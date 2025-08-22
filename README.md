@@ -23,7 +23,6 @@ A fully integrated authentication system between Laravel 12 backend and Vue.js 3
 
 - **Complete User CRUD:** Full user management system with repository pattern
 - **Automatic Email Notifications:** Observer pattern implementation for sending welcome emails to new users via queue jobs
-- **Permission System:** Role-based access control with granular permissions
 - **API Architecture:**
   - Repository Pattern for data access
   - Service Layer for business logic
@@ -45,7 +44,9 @@ php artisan serve
 
 #### Frontend Setup (Vue 3)
 ```bash
-cd front
+cd front/src
+cp env.example.js env.js
+cd ../
 yarn install
 yarn dev
 ```
@@ -59,6 +60,7 @@ yarn dev
 - PHP 8.2+
 
 **Frontend:**
+- Node 18
 - Vue 3 (Composition API)
 - Pinia (State Management)
 - Vue Router
@@ -110,7 +112,6 @@ Um sistema de autenticação totalmente integrado entre o backend Laravel 12 e o
 
 - **CRUD Completo de Usuários:** Sistema completo de gerenciamento de usuários com padrão repository
 - **Notificações Automáticas por Email:** Implementação do padrão Observer para envio de emails de boas-vindas para novos usuários via jobs em fila
-- **Sistema de Permissões:** Controle de acesso baseado em papéis com permissões granulares
 - **Arquitetura da API:**
   - Padrão Repository para acesso a dados
   - Camada de Serviço para lógica de negócios
@@ -132,7 +133,9 @@ php artisan serve
 
 #### Configuração do Frontend (Vue 3)
 ```bash
-cd front
+cd front/src
+cp env.example.js env.js
+cd ../
 yarn install
 yarn dev
 ```
@@ -146,6 +149,7 @@ yarn dev
 - PHP 8.2+
 
 **Frontend:**
+- Node 18
 - Vue 3 (Composition API)
 - Pinia (Gerenciamento de Estado)
 - Vue Router

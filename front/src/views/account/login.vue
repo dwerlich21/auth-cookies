@@ -205,7 +205,7 @@ export default {
 
                             </b-card-body>
 
-                            <BCardFooter v-if="env.template_type === 'citidash'">
+                            <BCardFooter>
                                 <BRow>
                                     <BCol
                                         xxl="12"

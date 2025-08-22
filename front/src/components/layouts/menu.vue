@@ -207,17 +207,6 @@ watch(route, (newRoute) => {
                     </ul>
                 </div>
             </li>
-
-            <li class="nav-item">
-                <a
-                    class="nav-link menu-link"
-                    :href="`https://wa.me/${env.support}`"
-                    target="_blank"
-                >
-                    <i class="mdi mdi-whatsapp"/>
-                    <span>Suporte</span>
-                </a>
-            </li>
         </ul>
     </b-container>
 </template>
