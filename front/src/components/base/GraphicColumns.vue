@@ -120,9 +120,7 @@ export default {
         })
 
         const setType = () => {
-            http.get(props.url, {
-                    headers: {'Authorization': ` Bearer ${localStorage.getItem('token')} `}
-                })
+            http.get(props.url)
                 .then((response) => {
                     getData(response.data.datasets);
                 })

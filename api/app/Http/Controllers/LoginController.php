@@ -89,10 +89,9 @@ class LoginController
     public function logout(Request $request): JsonResponse
     {
         if ($request->user()) {
+            // Revoke all tokens for the user
             $request->user()->tokens()->delete();
         }
-
-        Auth::logout();
 
         return response()->json([
             'success' => true,

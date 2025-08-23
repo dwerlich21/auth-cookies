@@ -70,9 +70,7 @@ const toggleDarkMode = () => {
 const verifyCnpj = () => {
     const cnpj = document.getElementById('search-cnpj').value;
 
-    http.post('leads/verificar-cnpj', {cnpj}, {
-        headers: {'Authorization': ` Bearer ${localStorage.getItem('token')} `}
-    })
+    http.post('leads/verificar-cnpj', {cnpj})
         .then((response) => {
             if (response.data.message > 0) {
                 notifyError('CNPJ já cadastrado');

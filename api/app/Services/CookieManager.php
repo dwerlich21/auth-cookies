@@ -29,7 +29,7 @@ class CookieManager
             $name,
             $token,
             $minutes,
-            null,     // path
+            '/',      // path - importante para garantir que o cookie seja acessível em todo o site
             null,     // domain
             true,     // secure (HTTPS only in production)
             true,     // httpOnly
@@ -75,7 +75,18 @@ class CookieManager
      */
     public function forgetAccessTokenCookie(): SymfonyCookie
     {
-        return Cookie::forget(self::ACCESS_TOKEN_COOKIE);
+        // Criar cookie com valor vazio e tempo expirado para garantir remoção
+        return Cookie::make(
+            self::ACCESS_TOKEN_COOKIE,
+            '',
+            -1,       // tempo negativo para expirar imediatamente
+            '/',      // path
+            null,     // domain
+            true,     // secure
+            true,     // httpOnly
+            false,    // raw
+            'lax'     // sameSite
+        );
     }
     
     /**
@@ -85,7 +96,18 @@ class CookieManager
      */
     public function forgetRefreshTokenCookie(): SymfonyCookie
     {
-        return Cookie::forget(self::REFRESH_TOKEN_COOKIE);
+        // Criar cookie com valor vazio e tempo expirado para garantir remoção
+        return Cookie::make(
+            self::REFRESH_TOKEN_COOKIE,
+            '',
+            -1,       // tempo negativo para expirar imediatamente
+            '/',      // path
+            null,     // domain
+            true,     // secure
+            true,     // httpOnly
+            false,    // raw
+            'lax'     // sameSite
+        );
     }
     
     /**

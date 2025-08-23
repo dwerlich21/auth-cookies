@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
             } catch (error) {
                 // Continue with logout even if request fails
             }
-            this.setCurrentUser({})
+            this.setCurrentUser(null)
         },
 
         initialize() {

@@ -74,8 +74,8 @@ class RefreshTokenMiddleware
                             'access_token',
                             $newAccessToken->plainTextToken,
                             self::ACCESS_TOKEN_EXPIRY,
-                            null,
-                            null,
+                            '/',  // path
+                            null, // domain
                             true, // secure
                             true, // httpOnly
                             false, // raw

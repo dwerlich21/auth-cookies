@@ -936,9 +936,6 @@ export default {
                 const response = await fetch('/api/image-upload', {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Ajuste conforme sua autenticação
-                    }
                 })
 
                 if (!response.ok) {
@@ -1083,7 +1080,6 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
                     body: JSON.stringify({
                         image_ids: usedImageIds.value
